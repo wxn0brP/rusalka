@@ -1,5 +1,6 @@
 name: "Rusalka - wxn0brP"
 description: "wxn0brP's typescript ci"
+author: "wxn0brP"
 
 branding:
   color: "purple"
@@ -8,6 +9,9 @@ branding:
 runs:
   using: "composite"
   steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
     - name: Install Bun
       shell: bash
       run: |
@@ -16,7 +20,10 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: bun install
+      run: |
+        echo "Current dir: $(pwd)"
+        ls -la
+        bun install
 
     - name: Run TS script with Bun
       shell: bash
