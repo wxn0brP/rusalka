@@ -149,8 +149,8 @@ try {
         else if (pkgVersion.includes("beta")) tag = "beta";
         else if (pkgVersion.includes("rc")) tag = "next";
 
-        core.info(`Publishing version ${pkgVersion} with tag ${tag}`);
-        await exec.exec("npm", ["publish", "--access", "public", "--tag", tag]);
+        core.info(`Detected tag: ${tag}`);
+        core.setOutput("npm_tag", tag);
         core.endGroup();
     }
 

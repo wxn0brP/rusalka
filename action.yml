@@ -31,7 +31,16 @@ runs:
 
     - name: Run TS script with Bun
       shell: bash
+      id: rusalka
       run: bun $GITHUB_ACTION_PATH/src/index.ts
+
+    - name: Publish package to npm
+      if: steps.rusalka.outputs.npm-tag != ''
+      shell: sh
+      run: npm publish --access public --tag $NPM_TAG
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NPM_TAG: ${{ steps.rusalka.outputs.npm_tag }}
 
 outputs:
   message:
