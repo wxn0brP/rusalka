@@ -1,0 +1,115 @@
+import * as core from "@actions/core";
+import * as exec from "@actions/exec";
+import * as github from "@actions/github";
+import fs from "fs";
+import path from "path";
+
+try {
+    // --- INPUTS ---
+    let files = (core.getInput("files") || "dist package.json LICENSE").split(" ");
+    const branch = core.getInput("branch") || "dist";
+    const preBuildCommands = core.getInput("preBuildCustomCommands");
+    const postBuildCommands = core.getInput("customCommands");
+    const scriptsHandling = core.getInput("scriptsHandling") || "keep-start";
+    const customScripts = core.getInput("customScripts");
+    const publishToNpm = core.getInput("publishToNpm") === "true";
+    const createVersionedBranch = core.getInput("createVersionedBranch") === "true";
+
+    for (const file of files) {
+        if (!fs.existsSync(file)) {
+            core.warning(`File/directory "${file}" does not exist. Skipping...`);
+            files.splice(files.indexOf(file), 1);
+        }
+    }
+
+    core.info(`Deploying to branch: ${branch}`);
+    core.info(`Files: ${files.join(", ")}`);
+
+    // --- SETUP ---
+    await exec.exec("git", ["config", "--global", "user.name", "github-actions[bot]"]);
+    await exec.exec("git", ["config", "--global", "user.email", "github-actions[bot]@users.noreply.github.com"]);
+
+    // --- PRE BUILD COMMANDS ---
+    if (preBuildCommands) {
+        core.info(`Running pre-build commands: ${preBuildCommands}`);
+        await exec.exec("bash", ["-c", preBuildCommands]);
+    }
+
+    // --- BUILD ---
+    core.info("Installing dependencies");
+    await exec.exec("npm", ["ci"]);
+    core.info("Building project");
+    await exec.exec("npm", ["run", "build"]);
+
+    // --- POST BUILD COMMANDS ---
+    if (postBuildCommands) {
+        core.info(`Running post-build commands: ${postBuildCommands}`);
+        await exec.exec("bash", ["-c", postBuildCommands]);
+    }
+
+    // --- MODIFY package.json ---
+    if (scriptsHandling !== "retain-all") {
+        const pkgPath = path.join(process.cwd(), "package.json");
+        const pkgJson = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+
+        if (scriptsHandling === "remove-all") {
+            delete pkgJson.scripts;
+        } else if (scriptsHandling === "keep-start") {
+            pkgJson.scripts = pkgJson.scripts?.start ? { start: pkgJson.scripts.start } : {};
+        } else if (scriptsHandling === "keep-build") {
+            pkgJson.scripts = pkgJson.scripts?.build ? { start: pkgJson.scripts.build } : {};
+        } else if (scriptsHandling === "custom-list" && customScripts) {
+            const keep = customScripts.split(",").map(s => s.trim());
+            pkgJson.scripts = Object.fromEntries(
+                Object.entries(pkgJson.scripts || {}).filter(([k]) => keep.includes(k))
+            );
+        }
+
+        fs.writeFileSync(pkgPath, JSON.stringify(pkgJson, null, 2));
+        core.info("Modified package.json scripts");
+    }
+
+    // --- DEPLOY TO BRANCH ---
+    core.info(`Checking out orphan branch: ${branch}`);
+    await exec.exec("git", ["checkout", "--orphan", branch]);
+    await exec.exec("git", ["reset", "--hard"]);
+
+    for (const file of files) {
+        if (fs.existsSync(file)) {
+            await exec.exec("git", ["add", "-f", file]);
+        } else {
+            core.warning(`File does not exist: ${file}`);
+        }
+    }
+
+    await exec.exec("git", ["commit", "-m", `Deploy to ${branch}`]);
+    await exec.exec("git", ["push", "origin", branch, "--force"]);
+
+    // --- VERSIONED BRANCH ---
+    const ref = github.context.ref; // eg refs/tags/v1.0.0
+    if (createVersionedBranch && ref.startsWith("refs/tags/")) {
+        const tagName = ref.replace("refs/tags/", "");
+        const versionedBranch = `${branch}-${tagName}`;
+        core.info(`Creating versioned branch: ${versionedBranch}`);
+        await exec.exec("git", ["checkout", "-b", versionedBranch]);
+        await exec.exec("git", ["push", "origin", versionedBranch, "--force"]);
+    }
+
+    // --- PUBLISH TO NPM (OIDC) ---
+    if (publishToNpm && ref.startsWith("refs/tags/")) {
+        core.info("Publishing to npm...");
+        process.env.NPM_CONFIG_PROVENANCE = "true";
+        const pkgVersion = JSON.parse(fs.readFileSync("package.json", "utf8")).version;
+        let tag = "latest";
+
+        if (pkgVersion.includes("alpha")) tag = "alpha";
+        else if (pkgVersion.includes("beta")) tag = "beta";
+        else if (pkgVersion.includes("rc")) tag = "next";
+
+        core.info(`Publishing version ${pkgVersion} with tag ${tag}`);
+        await exec.exec("npm", ["publish", "--access", "public", "--tag", tag]);
+    }
+
+} catch (error: unknown) {
+    if (error instanceof Error) core.setFailed(error.message);
+}

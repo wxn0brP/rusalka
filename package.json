@@ -1,0 +1,23 @@
+{
+    "name": "rusalka",
+    "version": "0.0.1",
+    "main": "dist/index.js",
+    "description": "",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/wxn0brP/rusalka.git"
+    },
+    "homepage": "https://github.com/wxn0brP/rusalka",
+    "author": "wxn0brP",
+    "license": "MIT",
+    "type": "module",
+    "devDependencies": {
+        "@types/bun": "*",
+        "typescript": "*"
+    },
+    "dependencies": {
+        "@actions/core": "^1.11.1",
+        "@actions/exec": "^1.1.1",
+        "@actions/github": "^6.0.1"
+    }
+}
