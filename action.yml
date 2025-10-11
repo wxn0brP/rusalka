@@ -21,13 +21,11 @@ runs:
     - name: Install dependencies
       shell: bash
       run: |
-        echo "Current dir: $(pwd)"
-        ls -la
         bun install
 
     - name: Run TS script with Bun
       shell: bash
-      run: bun src/index.ts
+      run: bun $GITHUB_ACTION_PATH/src/index.ts
 
 inputs:
   files:
