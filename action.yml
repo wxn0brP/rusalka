@@ -35,7 +35,7 @@ runs:
       run: bun $GITHUB_ACTION_PATH/src/index.ts
 
     - name: Publish package to npm
-      if: steps.rusalka.outputs.npm-tag != ''
+      if: steps.rusalka.outputs.npm_tag != ''
       shell: sh
       run: npm publish --access public --tag $NPM_TAG
       env:
