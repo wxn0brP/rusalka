@@ -79,6 +79,7 @@ try {
     core.startGroup("💜 Deploy to branch");
     core.info(`Checking out orphan branch: ${branch}`);
     await exec.exec("git", ["checkout", "--orphan", branch]);
+    await exec.exec("git", ["reset", "-q", "HEAD", "--"]);
 
     for (const file of files) {
         if (fs.existsSync(file)) {
