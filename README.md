@@ -41,7 +41,7 @@ This allows you to use TypeScript for dynamic logic or JSON for static configura
 | `scriptsHandling` | string | Control how scripts in package.json are handled:<br>- `"retain-all"`: Retain all scripts<br>- `"remove-all"`: Remove all scripts<br>- `"keep-start"`: Keep only the "start" script<br>- `"keep-build"`: Keep only the "build" script<br>- `"custom-list"`: Provide a custom list of scripts to retain | `"remove-all"` |
 | `customScripts` | string | Comma-separated list of scripts to retain (used with `scriptsHandling: custom-list`) | `""` |
 | `publishToNpm` | boolean | Publish the package to npm (optional) | `false` |
-| `createVersionedBranch` | boolean | If true and run on tag, also create a dist-{version} branch | `false` |
+| `createVersionedBranch` | boolean | If true and run on tag, also create a dist-{version} branch | `true` |
 
 ### Configuration File Example
 
@@ -56,7 +56,7 @@ export const postBuildCommands = "";
 export const scriptsHandling = "remove-all";
 export const customScripts = [];
 export const publishToNpm = true;
-export const createVersionedBranch = false;
+export const createVersionedBranch = true;
 // or export default
 ```
 
@@ -70,7 +70,7 @@ export const createVersionedBranch = false;
     "scriptsHandling": "remove-all",
     "customScripts": [],
     "publishToNpm": true,
-    "createVersionedBranch": false
+    "createVersionedBranch": true
 }
 ```
 

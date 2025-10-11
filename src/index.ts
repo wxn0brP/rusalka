@@ -26,7 +26,7 @@ try {
         scriptsHandling: "remove-all",
         customScripts: [],
         publishToNpm: false,
-        createVersionedBranch: false
+        createVersionedBranch: true
     }
 
     const workflowName = github.context.workflow.toLowerCase().replace(/\s+/g, "_");
