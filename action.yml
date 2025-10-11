@@ -26,6 +26,15 @@ runs:
     - name: Run TS script with Bun
       shell: bash
       run: bun $GITHUB_ACTION_PATH/src/index.ts
+      with:
+        files: ${{ inputs.files }}
+        branch: ${{ inputs.branch }}
+        customCommands: ${{ inputs.customCommands }}
+        preBuildCustomCommands: ${{ inputs.preBuildCustomCommands }}
+        publishToNpm: ${{ inputs.publishToNpm }}
+        scriptsHandling: ${{ inputs.scriptsHandling }}
+        customScripts: ${{ inputs.customScripts }}
+        createVersionedBranch: ${{ inputs.createVersionedBranch }}
 
 inputs:
   files:
