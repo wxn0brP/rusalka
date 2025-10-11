@@ -38,6 +38,8 @@ This allows you to use TypeScript for dynamic logic or JSON for static configura
 | `branch` | string | Target branch | `"dist"` |
 | `preBuildCommands` | string | Run custom commands before build | `""` |
 | `postBuildCommands` | string | Run custom commands after build | `""` |
+| `preBuildFn` | Function | Run custom commands before build (Only available in .ts config) | `undefined` |
+| `postBuildFn` | Function | Run custom commands after build (Only available in .ts config) | `undefined` |
 | `scriptsHandling` | string | Control how scripts in package.json are handled:<br>- `"retain-all"`: Retain all scripts<br>- `"remove-all"`: Remove all scripts<br>- `"keep-start"`: Keep only the "start" script<br>- `"keep-build"`: Keep only the "build" script<br>- `"custom-list"`: Provide a custom list of scripts to retain | `"remove-all"` |
 | `customScripts` | string | Comma-separated list of scripts to retain (used with `scriptsHandling: custom-list`) | `""` |
 | `publishToNpm` | boolean | Publish the package to npm (optional) | `false` |

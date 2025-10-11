@@ -5,14 +5,16 @@ import fs from "fs";
 import path from "path";
 
 interface Config {
-    files: string[],
-    branch: string,
-    preBuildCommands: string,
-    postBuildCommands: string,
-    scriptsHandling: string,
-    customScripts: string[],
-    publishToNpm: boolean,
-    createVersionedBranch: boolean
+    files: string[];
+    branch: string;
+    preBuildCommands: string;
+    postBuildCommands: string;
+    preBuildFn: Function;
+    postBuildFn: Function;
+    scriptsHandling: string;
+    customScripts: string[];
+    publishToNpm: boolean;
+    createVersionedBranch: boolean;
 }
 
 try {
@@ -23,6 +25,8 @@ try {
         branch: "dist",
         preBuildCommands: "",
         postBuildCommands: "",
+        preBuildFn: undefined,
+        postBuildFn: undefined,
         scriptsHandling: "remove-all",
         customScripts: [],
         publishToNpm: false,
@@ -66,6 +70,14 @@ try {
         core.endGroup();
     }
 
+    // --- PRE BUILD FUNCTION ---
+    if (config.preBuildFn) {
+        core.startGroup("💜 Pre-build function");
+        core.info("Running pre-build function");
+        await config.preBuildFn();
+        core.endGroup();
+    }
+
     // --- BUILD ---
     core.startGroup("💜 Build");
     core.info("Installing dependencies");
@@ -79,6 +91,14 @@ try {
         core.startGroup("💜 Post-build commands");
         core.info(`Running post-build commands: ${config.postBuildCommands}`);
         await exec.exec("bash", ["-c", config.postBuildCommands]);
+        core.endGroup();
+    }
+
+    // --- POST BUILD FUNCTION ---
+    if (config.postBuildFn) {
+        core.startGroup("💜 Post-build function");
+        core.info("Running post-build function");
+        await config.postBuildFn();
         core.endGroup();
     }
 
