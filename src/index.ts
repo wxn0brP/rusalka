@@ -16,12 +16,6 @@ try {
     const createVersionedBranch = core.getInput("createVersionedBranch") === "true";
 
     core.startGroup("💜 Inputs");
-    for (const file of files) {
-        if (!fs.existsSync(file)) {
-            core.warning(`File/directory "${file}" does not exist. Skipping...`);
-            files.splice(files.indexOf(file), 1);
-        }
-    }
 
     core.info(`Deploying to branch: ${branch}`);
     core.info(`Files: ${files.join(", ")}`);
@@ -85,7 +79,6 @@ try {
     core.startGroup("💜 Deploy to branch");
     core.info(`Checking out orphan branch: ${branch}`);
     await exec.exec("git", ["checkout", "--orphan", branch]);
-    await exec.exec("git", ["reset", "--hard"]);
 
     for (const file of files) {
         if (fs.existsSync(file)) {
