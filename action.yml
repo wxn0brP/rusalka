@@ -53,3 +53,7 @@ outputs:
   message:
     value: "Rusalka is majestic"
     description: "Majestic exit"
+
+  npm_tag:
+    value: ${{ steps.rusalka.outputs.npm_tag }}
+    description: "NPM tag"
