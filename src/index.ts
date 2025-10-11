@@ -4,21 +4,31 @@ import * as github from "@actions/github";
 import fs from "fs";
 import path from "path";
 
+interface Config {
+    files: string[],
+    branch: string,
+    preBuildCommands: string,
+    postBuildCommands: string,
+    scriptsHandling: string,
+    customScripts: string,
+    publishToNpm: boolean,
+    createVersionedBranch: boolean
+}
+
 try {
     // --- INPUTS ---
-    let files = (core.getInput("files") || "dist package.json LICENSE").split(" ");
-    const branch = core.getInput("branch") || "dist";
-    const preBuildCommands = core.getInput("preBuildCustomCommands");
-    const postBuildCommands = core.getInput("customCommands");
-    const scriptsHandling = core.getInput("scriptsHandling") || "keep-start";
-    const customScripts = core.getInput("customScripts");
-    const publishToNpm = core.getInput("publishToNpm") === "true";
-    const createVersionedBranch = core.getInput("createVersionedBranch") === "true";
-
     core.startGroup("💜 Inputs");
-
-    core.info(`Deploying to branch: ${branch}`);
-    core.info(`Files: ${files.join(", ")}`);
+    const config: Config = {
+        files: (core.getInput("files") || "dist package.json LICENSE").split(" "),
+        branch: core.getInput("branch") || "dist",
+        preBuildCommands: core.getInput("preBuildCustomCommands"),
+        postBuildCommands: core.getInput("customCommands"),
+        scriptsHandling: core.getInput("scriptsHandling") || "keep-start",
+        customScripts: core.getInput("customScripts"),
+        publishToNpm: core.getInput("publishToNpm") === "true",
+        createVersionedBranch: core.getInput("createVersionedBranch") === "true"
+    }
+    core.info(`Config: ${JSON.stringify(config, null, 2)}`);
     core.endGroup();
 
     // --- SETUP ---
@@ -28,10 +38,10 @@ try {
     core.endGroup();
 
     // --- PRE BUILD COMMANDS ---
-    if (preBuildCommands) {
+    if (config.preBuildCommands) {
         core.startGroup("💜 Pre-build commands");
-        core.info(`Running pre-build commands: ${preBuildCommands}`);
-        await exec.exec("bash", ["-c", preBuildCommands]);
+        core.info(`Running pre-build commands: ${config.preBuildCommands}`);
+        await exec.exec("bash", ["-c", config.preBuildCommands]);
         core.endGroup();
     }
 
@@ -44,27 +54,27 @@ try {
     core.endGroup();
 
     // --- POST BUILD COMMANDS ---
-    if (postBuildCommands) {
+    if (config.postBuildCommands) {
         core.startGroup("💜 Post-build commands");
-        core.info(`Running post-build commands: ${postBuildCommands}`);
-        await exec.exec("bash", ["-c", postBuildCommands]);
+        core.info(`Running post-build commands: ${config.postBuildCommands}`);
+        await exec.exec("bash", ["-c", config.postBuildCommands]);
         core.endGroup();
     }
 
     // --- MODIFY package.json ---
-    if (scriptsHandling !== "retain-all") {
+    if (config.scriptsHandling !== "retain-all") {
         core.info("Modifying package.json scripts");
         const pkgPath = path.join(process.cwd(), "package.json");
         const pkgJson = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
 
-        if (scriptsHandling === "remove-all") {
+        if (config.scriptsHandling === "remove-all") {
             delete pkgJson.scripts;
-        } else if (scriptsHandling === "keep-start") {
+        } else if (config.scriptsHandling === "keep-start") {
             pkgJson.scripts = pkgJson.scripts?.start ? { start: pkgJson.scripts.start } : {};
-        } else if (scriptsHandling === "keep-build") {
+        } else if (config.scriptsHandling === "keep-build") {
             pkgJson.scripts = pkgJson.scripts?.build ? { start: pkgJson.scripts.build } : {};
-        } else if (scriptsHandling === "custom-list" && customScripts) {
-            const keep = customScripts.split(",").map(s => s.trim());
+        } else if (config.scriptsHandling === "custom-list" && config.customScripts) {
+            const keep = config.customScripts.split(",").map(s => s.trim());
             pkgJson.scripts = Object.fromEntries(
                 Object.entries(pkgJson.scripts || {}).filter(([k]) => keep.includes(k))
             );
@@ -77,11 +87,11 @@ try {
 
     // --- DEPLOY TO BRANCH ---
     core.startGroup("💜 Deploy to branch");
-    core.info(`Checking out orphan branch: ${branch}`);
-    await exec.exec("git", ["checkout", "--orphan", branch]);
+    core.info(`Checking out orphan branch: ${config.branch}`);
+    await exec.exec("git", ["checkout", "--orphan", config.branch]);
     await exec.exec("git", ["reset", "-q", "HEAD", "--"]);
 
-    for (const file of files) {
+    for (const file of config.files) {
         if (fs.existsSync(file)) {
             await exec.exec("git", ["add", "-f", file]);
         } else {
@@ -89,16 +99,17 @@ try {
         }
     }
 
-    await exec.exec("git", ["commit", "-m", `Deploy to ${branch}`]);
-    await exec.exec("git", ["push", "origin", branch, "--force"]);
+    await exec.exec("git", ["commit", "-m", `Deploy to ${config.branch}`]);
+    await exec.exec("git", ["push", "origin", config.branch, "--force"]);
     core.endGroup();
 
     // --- VERSIONED BRANCH ---
     const ref = github.context.ref; // eg refs/tags/v1.0.0
-    if (createVersionedBranch && ref.startsWith("refs/tags/")) {
+    core.info(`Current ref: ${ref}`);
+    if (config.createVersionedBranch && ref.startsWith("refs/tags/")) {
         core.startGroup("💜 Create versioned branch");
         const tagName = ref.replace("refs/tags/", "");
-        const versionedBranch = `${branch}-${tagName}`;
+        const versionedBranch = `${config.branch}-${tagName}`;
         core.info(`Creating versioned branch: ${versionedBranch}`);
         await exec.exec("git", ["checkout", "-b", versionedBranch]);
         await exec.exec("git", ["push", "origin", versionedBranch, "--force"]);
@@ -106,7 +117,7 @@ try {
     }
 
     // --- PUBLISH TO NPM (OIDC) ---
-    if (publishToNpm && ref.startsWith("refs/tags/")) {
+    if (config.publishToNpm && ref.startsWith("refs/tags/")) {
         core.startGroup("💜 Publish to npm");
         core.info("Publishing to npm...");
         process.env.NPM_CONFIG_PROVENANCE = "true";
