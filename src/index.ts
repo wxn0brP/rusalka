@@ -149,6 +149,9 @@ try {
         else if (pkgVersion.includes("beta")) tag = "beta";
         else if (pkgVersion.includes("rc")) tag = "next";
 
+        process.env.NODE_AUTH_TOKEN = await core.getIDToken("https://registry.npmjs.org/");
+        core.info("Retrieved OIDC token from GitHub");
+
         core.info(`Publishing version ${pkgVersion} with tag ${tag}`);
         await exec.exec("npm", ["publish", "--access", "public", "--tag", tag]);
         core.endGroup();
