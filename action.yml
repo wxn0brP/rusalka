@@ -1,6 +1,10 @@
 name: "Rusalka - wxn0brP"
 description: "wxn0brP's typescript ci"
 
+branding:
+  color: "purple"
+  icon: "hash"
+
 runs:
   using: "composite"
   steps:
