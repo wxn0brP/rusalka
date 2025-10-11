@@ -26,50 +26,6 @@ runs:
     - name: Run TS script with Bun
       shell: bash
       run: bun $GITHUB_ACTION_PATH/src/index.ts
-      with:
-        files: ${{ inputs.files }}
-        branch: ${{ inputs.branch }}
-        customCommands: ${{ inputs.customCommands }}
-        preBuildCustomCommands: ${{ inputs.preBuildCustomCommands }}
-        publishToNpm: ${{ inputs.publishToNpm }}
-        scriptsHandling: ${{ inputs.scriptsHandling }}
-        customScripts: ${{ inputs.customScripts }}
-        createVersionedBranch: ${{ inputs.createVersionedBranch }}
-
-inputs:
-  files:
-    description: "List of files/directories to copy (space-separated)"
-    required: false
-    default: "dist package.json LICENSE"
-  branch:
-    description: "Target branch"
-    required: false
-    default: "dist"
-  customCommands:
-    description: "Run custom commands after build"
-    required: false
-  preBuildCustomCommands:
-    description: "Run custom commands before build"
-    required: false
-  publishToNpm:
-    description: "Publish the package to npm (optional)"
-    required: false
-  scriptsHandling:
-    description: |
-      Control how scripts in package.json are handled:
-      - `retain-all`: Retain all scripts.
-      - `remove-all`: Remove all scripts.
-      - `keep-start`: Keep only the "start" script (if it exists); remove all others.
-      - `keep-build`: Keep only the "build" script (if it exists); remove all others.
-      - `custom-list`: Provide a custom list of scripts to retain.
-    required: false
-    default: "remove-all"
-  customScripts:
-    description: "Comma-separated list of scripts to retain (used with `scriptsHandling: custom-list`)"
-    required: false
-  createVersionedBranch:
-    description: "If true and run on tag, also create a dist-{version} branch"
-    required: false
 
 outputs:
   message:

@@ -19,15 +19,36 @@ try {
     // --- INPUTS ---
     core.startGroup("💜 Inputs");
     const config: Config = {
-        files: (core.getInput("files") || "dist package.json LICENSE").split(" "),
-        branch: core.getInput("branch") || "dist",
-        preBuildCommands: core.getInput("preBuildCustomCommands"),
-        postBuildCommands: core.getInput("customCommands"),
-        scriptsHandling: core.getInput("scriptsHandling") || "keep-start",
-        customScripts: core.getInput("customScripts"),
-        publishToNpm: core.getInput("publishToNpm") === "true",
-        createVersionedBranch: core.getInput("createVersionedBranch") === "true"
+        files: ["dist", "package.json", "LICENSE"],
+        branch: "dist",
+        preBuildCommands: "",
+        postBuildCommands: "",
+        scriptsHandling: "retain-all",
+        customScripts: "",
+        publishToNpm: false,
+        createVersionedBranch: false
     }
+
+    const workflowName = github.context.workflow.toLowerCase().replace(/\s+/g, "_");
+    const basePath = path.resolve(process.env.GITHUB_WORKSPACE || process.cwd(), "rusalka");
+    const configExt = ["ts", "json"].find(ext => fs.existsSync(path.join(basePath, `${workflowName}.${ext}`)));
+    if (configExt) {
+        const configFile = path.join(basePath, `${workflowName}.${configExt}`);
+        switch (configExt) {
+            case "ts":
+            case "js":
+                const tsConfig = await import(path.resolve(configFile));
+                Object.assign(config, tsConfig.default || tsConfig);
+                break;
+            case "json":
+                const jsonConfig = JSON.parse(fs.readFileSync(configFile, "utf-8"));
+                Object.assign(config, jsonConfig);
+                break;
+            default:
+                break;
+        }
+    }
+
     core.info(`Config: ${JSON.stringify(config, null, 2)}`);
     core.endGroup();
 
