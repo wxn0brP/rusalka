@@ -15,7 +15,7 @@ try {
     const publishToNpm = core.getInput("publishToNpm") === "true";
     const createVersionedBranch = core.getInput("createVersionedBranch") === "true";
 
-    core.startGroup("Inputs");
+    core.startGroup("💜 Inputs");
     for (const file of files) {
         if (!fs.existsSync(file)) {
             core.warning(`File/directory "${file}" does not exist. Skipping...`);
@@ -35,23 +35,23 @@ try {
 
     // --- PRE BUILD COMMANDS ---
     if (preBuildCommands) {
-        core.startGroup("Pre-build commands");
+        core.startGroup("💜 Pre-build commands");
         core.info(`Running pre-build commands: ${preBuildCommands}`);
         await exec.exec("bash", ["-c", preBuildCommands]);
         core.endGroup();
     }
 
     // --- BUILD ---
-    core.startGroup("Build");
+    core.startGroup("💜 Build");
     core.info("Installing dependencies");
-    await exec.exec("npm", ["ci"]);
+    await exec.exec("bun", ["install"]);
     core.info("Building project");
-    await exec.exec("npm", ["run", "build"]);
+    await exec.exec("bun", ["run", "build"]);
     core.endGroup();
 
     // --- POST BUILD COMMANDS ---
     if (postBuildCommands) {
-        core.startGroup("Post-build commands");
+        core.startGroup("💜 Post-build commands");
         core.info(`Running post-build commands: ${postBuildCommands}`);
         await exec.exec("bash", ["-c", postBuildCommands]);
         core.endGroup();
@@ -82,7 +82,7 @@ try {
     }
 
     // --- DEPLOY TO BRANCH ---
-    core.startGroup("Deploy to branch");
+    core.startGroup("💜 Deploy to branch");
     core.info(`Checking out orphan branch: ${branch}`);
     await exec.exec("git", ["checkout", "--orphan", branch]);
     await exec.exec("git", ["reset", "--hard"]);
@@ -102,7 +102,7 @@ try {
     // --- VERSIONED BRANCH ---
     const ref = github.context.ref; // eg refs/tags/v1.0.0
     if (createVersionedBranch && ref.startsWith("refs/tags/")) {
-        core.startGroup("Create versioned branch");
+        core.startGroup("💜 Create versioned branch");
         const tagName = ref.replace("refs/tags/", "");
         const versionedBranch = `${branch}-${tagName}`;
         core.info(`Creating versioned branch: ${versionedBranch}`);
@@ -113,7 +113,7 @@ try {
 
     // --- PUBLISH TO NPM (OIDC) ---
     if (publishToNpm && ref.startsWith("refs/tags/")) {
-        core.startGroup("Publish to npm");
+        core.startGroup("💜 Publish to npm");
         core.info("Publishing to npm...");
         process.env.NPM_CONFIG_PROVENANCE = "true";
         const pkgVersion = JSON.parse(fs.readFileSync("package.json", "utf8")).version;
