@@ -10,7 +10,7 @@ interface Config {
     preBuildCommands: string,
     postBuildCommands: string,
     scriptsHandling: string,
-    customScripts: string,
+    customScripts: string[],
     publishToNpm: boolean,
     createVersionedBranch: boolean
 }
@@ -23,8 +23,8 @@ try {
         branch: "dist",
         preBuildCommands: "",
         postBuildCommands: "",
-        scriptsHandling: "retain-all",
-        customScripts: "",
+        scriptsHandling: "remove-all",
+        customScripts: [],
         publishToNpm: false,
         createVersionedBranch: false
     }
@@ -95,7 +95,7 @@ try {
         } else if (config.scriptsHandling === "keep-build") {
             pkgJson.scripts = pkgJson.scripts?.build ? { start: pkgJson.scripts.build } : {};
         } else if (config.scriptsHandling === "custom-list" && config.customScripts) {
-            const keep = config.customScripts.split(",").map(s => s.trim());
+            const keep = config.customScripts;
             pkgJson.scripts = Object.fromEntries(
                 Object.entries(pkgJson.scripts || {}).filter(([k]) => keep.includes(k))
             );
