@@ -37,7 +37,9 @@ runs:
     - name: Publish package to npm
       if: steps.rusalka.outputs.npm_tag != ''
       shell: sh
-      run: npm publish --access public --tag $NPM_TAG
+      run: |
+        npm install -g npm@latest
+        npm publish --access public --tag $NPM_TAG
       env:
         NODE_AUTH_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         NPM_TAG: ${{ steps.rusalka.outputs.npm_tag }}
