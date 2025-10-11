@@ -79,6 +79,7 @@ export const createVersionedBranch = false;
 | Name | Description |
 |------|-------------|
 | `message` | Majestic exit message: "Rusalka is majestic" |
+[ `npm_tag` | NPM tag (if published): `latest`/`alpha`/`beta`/`next` |]
 
 ## Usage
 
@@ -103,6 +104,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: wxn0brP/rusalka@master
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # required to npm publish
+
 ```
 
 **Note:** Make sure to create the corresponding configuration file in the `rusalka` directory that matches your workflow name.
