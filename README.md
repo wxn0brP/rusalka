@@ -44,6 +44,7 @@ This allows you to use TypeScript for dynamic logic or JSON for static configura
 | `customScripts` | string | Comma-separated list of scripts to retain (used with `scriptsHandling: custom-list`) | `""` |
 | `publishToNpm` | boolean | Publish the package to npm (optional) | `false` |
 | `createVersionedBranch` | boolean | If true and run on tag, also create a dist-{version} branch | `true` |
+| `typeDocs` | number | Generate type docs (0 off, 1 if publishToNpm, 2 always) | `1` |
 
 ### Configuration File Example
 
@@ -59,6 +60,7 @@ export const scriptsHandling = "remove-all";
 export const customScripts = [];
 export const publishToNpm = true;
 export const createVersionedBranch = true;
+export const typeDocs = 1; // 0 off, 1 if publishToNpm, 2 always
 // or export default
 ```
 
@@ -72,7 +74,8 @@ export const createVersionedBranch = true;
     "scriptsHandling": "remove-all",
     "customScripts": [],
     "publishToNpm": true,
-    "createVersionedBranch": true
+    "createVersionedBranch": true,
+    "typeDocs": 1
 }
 ```
 
@@ -81,7 +84,8 @@ export const createVersionedBranch = true;
 | Name | Description |
 |------|-------------|
 | `message` | Majestic exit message: "Rusalka is majestic" |
-[ `npm_tag` | NPM tag (if published): `latest`/`alpha`/`beta`/`next` |]
+| `npm_tag` | NPM tag (if published): `latest`/`alpha`/`beta`/`next` |
+| `typedocs`| Set to `true` if type docs were published |
 
 ## Usage
 
@@ -104,6 +108,9 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - uses: wxn0brP/rusalka@master
         with:

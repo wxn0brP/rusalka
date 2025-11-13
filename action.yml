@@ -44,6 +44,13 @@ runs:
         NODE_AUTH_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         NPM_TAG: ${{ steps.rusalka.outputs.npm_tag }}
 
+    - name: Upload to gh pages
+      if: steps.rusalka.outputs.typedocs != ''
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ inputs.GITHUB_TOKEN }}
+        publish_dir: ./typedocs-generated
+
 inputs:
   GITHUB_TOKEN:
     description: "GitHub token for publishing to npm"

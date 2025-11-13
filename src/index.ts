@@ -15,6 +15,7 @@ interface Config {
     customScripts: string[];
     publishToNpm: boolean;
     createVersionedBranch: boolean;
+    typeDocs: number;
 }
 
 try {
@@ -30,7 +31,8 @@ try {
         scriptsHandling: "remove-all",
         customScripts: [],
         publishToNpm: false,
-        createVersionedBranch: true
+        createVersionedBranch: true,
+        typeDocs: 1,
     }
 
     const workflowName = github.context.workflow.toLowerCase().replace(/\s+/g, "_");
@@ -171,6 +173,19 @@ try {
 
         core.info(`Detected tag: ${tag}`);
         core.setOutput("npm_tag", tag);
+        core.endGroup();
+    }
+
+    const typedocs =
+        config.typeDocs === 2 ||
+        (config.typeDocs === 1 && config.publishToNpm);
+
+    if (typedocs) {
+        core.startGroup("💜 Typedocs");
+        core.info("Generating typedocs");
+        await exec.exec("bunx", ["typedoc", "--out", "typedocs-generated"]);
+        core.setOutput("typedocs", "true");
+
         core.endGroup();
     }
 
