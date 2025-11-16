@@ -185,6 +185,11 @@ try {
         core.info("Generating typedocs");
         await exec.exec("bunx", ["typedoc", "--out", "typedocs-generated"]);
         core.setOutput("typedocs", "true");
+        await exec.exec("curl", [
+            "-o",
+            "typedocs-generated/404.html",
+            "https://raw.githubusercontent.com/wxn0brP/wxn0brp.github.io/refs/heads/master/public/404.html"
+        ]);
 
         core.endGroup();
     }
