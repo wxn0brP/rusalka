@@ -16,6 +16,7 @@ interface Config {
     publishToNpm: boolean;
     createVersionedBranch: boolean;
     typeDocs: number;
+    notDeleteTests: boolean;
 }
 
 try {
@@ -33,6 +34,7 @@ try {
         publishToNpm: false,
         createVersionedBranch: true,
         typeDocs: 1,
+        notDeleteTests: false,
     }
 
     const workflowName = github.context.workflow.toLowerCase().replace(/\s+/g, "_");
@@ -77,6 +79,14 @@ try {
         core.startGroup("💜 Pre-build function");
         core.info("Running pre-build function");
         await config.preBuildFn();
+        core.endGroup();
+    }
+
+    // --- DELETE TESTS ---
+    if (!config.notDeleteTests && fs.existsSync("src/test")) {
+        core.startGroup("💜 Delete tests");
+        core.info("Deleting tests");
+        await exec.exec("rm", ["-rf", "test"]);
         core.endGroup();
     }
 
