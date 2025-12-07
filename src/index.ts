@@ -17,6 +17,7 @@ interface Config {
     createVersionedBranch: boolean;
     typeDocs: number;
     publishBranch: string;
+    destDir: string;
     notDeleteTests: boolean;
 }
 
@@ -36,6 +37,7 @@ try {
         createVersionedBranch: true,
         typeDocs: 1,
         publishBranch: "gh-pages",
+        destDir: "",
         notDeleteTests: false,
     }
 
@@ -197,6 +199,7 @@ try {
         core.info("Generating typedocs");
         await exec.exec("bunx", ["typedoc", "--out", "typedocs-generated"]);
         core.setOutput("typedocs", config.publishBranch);
+        core.setOutput("destination_dir", config.destDir);
         await exec.exec("curl", [
             "-o",
             "typedocs-generated/404.html",

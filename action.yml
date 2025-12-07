@@ -49,6 +49,7 @@ runs:
       with:
         github_token: ${{ inputs.GITHUB_TOKEN }}
         publish_dir: ./typedocs-generated
+        destination_dir: ${{ steps.rusalka.outputs.destination_dir }}
         publish_branch: ${{ steps.rusalka.outputs.typedocs }}
 
 inputs:
