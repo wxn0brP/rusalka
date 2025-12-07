@@ -45,6 +45,7 @@ This allows you to use TypeScript for dynamic logic or JSON for static configura
 | `publishToNpm` | boolean | Publish the package to npm (optional) | `false` |
 | `createVersionedBranch` | boolean | If true and run on tag, also create a dist-{version} branch | `true` |
 | `typeDocs` | number | Generate type docs (0 off, 1 if publishToNpm, 2 always) | `1` |
+| `publishBranch` | string | Target branch for publishing type docs (if typeDocs enabled) | `"gh-pages"` |
 | `notDeleteTests` | boolean | Do not delete ./src/test if exists | `false` |
 
 ### Configuration File Example
@@ -62,6 +63,7 @@ export const customScripts = [];
 export const publishToNpm = true;
 export const createVersionedBranch = true;
 export const typeDocs = 1; // 0 off, 1 if publishToNpm, 2 always
+export const publishBranch = "gh-pages";
 export const notDeleteTests = false;
 // or export default
 ```
@@ -78,6 +80,7 @@ export const notDeleteTests = false;
     "publishToNpm": true,
     "createVersionedBranch": true,
     "typeDocs": 1,
+    "publishBranch": "gh-pages",
     "notDeleteTests": false
 }
 ```

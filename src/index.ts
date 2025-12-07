@@ -16,6 +16,7 @@ interface Config {
     publishToNpm: boolean;
     createVersionedBranch: boolean;
     typeDocs: number;
+    publishBranch: string;
     notDeleteTests: boolean;
 }
 
@@ -34,6 +35,7 @@ try {
         publishToNpm: false,
         createVersionedBranch: true,
         typeDocs: 1,
+        publishBranch: "gh-pages",
         notDeleteTests: false,
     }
 
@@ -194,7 +196,7 @@ try {
         core.startGroup("💜 Typedocs");
         core.info("Generating typedocs");
         await exec.exec("bunx", ["typedoc", "--out", "typedocs-generated"]);
-        core.setOutput("typedocs", "true");
+        core.setOutput("typedocs", config.publishBranch);
         await exec.exec("curl", [
             "-o",
             "typedocs-generated/404.html",
