@@ -23,6 +23,12 @@ runs:
         node-version: 24
         registry-url: https://registry.npmjs.org/
 
+    - name: Setup Workflow
+      shell: bash
+      run: |
+        cd $GITHUB_ACTION_PATH
+        bun install
+
     - name: Install dependencies
       shell: bash
       run: |
