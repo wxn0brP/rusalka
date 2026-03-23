@@ -13,7 +13,7 @@
 	"type": "module",
 	"devDependencies": {
 		"@types/bun": "*",
-		"typescript": "^5"
+		"typescript": "^6.0.0"
 	},
 	"dependencies": {
 		"@actions/core": "^1.11.1",
